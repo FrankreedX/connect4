@@ -234,6 +234,13 @@ int askForInt(std::string prompt, int lowerLim, int upperLim) {
   return temp;
 }
 
+/*******************************************************************
+** Function: checkArgumentNumber
+** Description: checks if a char pointer is an int and is between 2 numbers, created to check integers taken from the argument
+** Input: argument, lower_bound, upper_bound, error
+** Output: input integer, exit program otherwise
+*******************************************************************/
+
 int checkArgumentNumber(char *argument, int lower_bound, int upper_bound, std::string error){
 	if(is_int(argument)){
 		int temp = string_to_int(argument);
@@ -243,4 +250,19 @@ int checkArgumentNumber(char *argument, int lower_bound, int upper_bound, std::s
 	}
 	std::cout << "Invalid arguments\n" << error << std::endl;
 	exit(42);
+}
+
+/*******************************************************************
+** Function: delete2D
+** Description: given a pointer to a 2d array and its dimensions, free the memory
+** Input: pointer to 2d array, size of the array
+** Output: NA
+*******************************************************************/
+
+void delete2D(int** board, int row){
+	for(int i = 0; i < row; i++){
+		delete [] board[i];
+	}
+	delete [] board;
+	board = NULL;
 }

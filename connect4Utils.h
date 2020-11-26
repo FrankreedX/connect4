@@ -11,5 +11,3 @@ int** createBoard(int col, int row);
 int addPiece(int** board, int piece, int col, int row, int& count);
 
 int checkWin(int** board, int col, int row, int moveCol, int moveRow, int count, int hypothetical = 0);
-
-void delete2D(int** board, int row);
