@@ -1,34 +1,30 @@
 #include <iostream>
 #include <cstring>
 #include <cmath>
+#include <ctime>
 #include "helper_functions.h"
 #include "connect4Utils.h"
 
 int heuristic(int** board, int** pointTable, int col, int row);
 
-int* alphabeta(int** board, int** pointTable, int* order, int col, int row, int depth, int alpha, int beta, bool red);
+int* alphabeta(int** board, int** pointTable, int* order, int col, int row, int depth, int alpha, int beta, bool red, int moveCol, int startTime);
 
 int* generateOrder(int col);
 
 int main(int argc, char *argv[]) {
-	//error if there are not enough arguments
-	if(argc < 3){
-		std::cout << "Expecting more arguments" << std::endl;
-		return 0;
-	}
 	//filtering each inputs
-	int twoPlayers = checkArgumentNumber(argv[1], 1, 2, "First argument must be either 1 or 2") - 1;
+	int twoPlayers = (argc > 1) ? checkArgumentNumber(argv[1], 1, 2, "First argument must be either 1 or 2", "Enter number of players ") - 1: askForInt("Enter number of players ", 1, 2);
 
-	int col = checkArgumentNumber(argv[2], 1, 20,"Second argument must be between 1 and 20");
+	int col = (argc > 2) ? checkArgumentNumber(argv[2], 1, 20,"Second argument must be between 1 and 20", "Enter number of columns ") : askForInt("Enter number of columns ", 1, 20);
 
-	int row = checkArgumentNumber(argv[3], 1, 20, "Third argument must be between 1 and 20");
+	int row = (argc > 3) ? checkArgumentNumber(argv[3], 1, 20, "Third argument must be between 1 and 20", "Enter number of rows ") : askForInt("Enter number of rows ", 1, 20);
 
 	//creating constant lists
 	int** pointTable = createPointTable(col, row);
 	int* order = generateOrder(col);
 
 	//game loop
-	while(1){
+	while(true){
 		int** board = createBoard(col, row); //gameboard creation
 		printBoard(board, col, row);
 
@@ -45,7 +41,11 @@ int main(int argc, char *argv[]) {
 
 			if(!red && !twoPlayers) std::cout << "Thinking...\n"; //print if computer is playing
 
-			int moveCol = (red || twoPlayers) ? askForInt("Enter column to drop ", 0, col-1) : alphabeta(board, pointTable, order, col, row, 9, -UINT16_MAX, UINT16_MAX, red)[0]; //moveCol becomes inputted number or computer generated
+			time_t t = time(NULL);
+
+			int moveCol = (red || twoPlayers) ? askForInt("Enter column to drop ", 0, col-1) : alphabeta(board, pointTable, order, col, row, 9, -UINT16_MAX, UINT16_MAX, red, 0, t)[0]; //moveCol becomes inputted number or computer generated
+
+			if(moveCol == -1) moveCol = random(0, col-1);
 
 			if(!red && !twoPlayers) std::cout << "Computer moved at column: " << moveCol << std::endl;
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		std::cout << (win==0 ? "draw" : (win==1 ? "yellow win" : "red win")) << std::endl;
-		if(!askForInt("Play again? (1 for yes, 0 for no) ", 0, 1)) {
+		if(!askForInt("Play again? (1 for yes, 0 for no) ", 0, 1)) {//clear memory and exit program
 			delete2D(board, row);
 			delete2D(pointTable, row);
 			delete [] order;
@@ -126,13 +126,13 @@ int* generateOrder(int col){
 ** Output: list pointer on heap containing the column(index 0) and score (index 1)
 *******************************************************************/
 
-int* alphabeta(int** board, int** pointTable, int* order, int col, int row, int depth, int alpha, int beta, bool red){
+int* alphabeta(int** board, int** pointTable, int* order, int col, int row, int depth, int alpha, int beta, bool red, int moveCol, int startTime){
 
 	int eval = heuristic(board, pointTable, col, row);
 
-	if(depth == 0 || eval == 0 || abs(eval) > 500) {//if the current gameboard is game ending, return the evaluation
+	if(depth == 0 || eval == 0 || abs(eval) > 500 || time(NULL)-startTime > 5) {//if the current gameboard is game ending, return the evaluation
 		int* returnArray = new int[2];
-		returnArray[0] = -1;
+		returnArray[0] = moveCol;
 		returnArray[1] = eval;
 		return returnArray;
 	}
@@ -150,7 +150,7 @@ int* alphabeta(int** board, int** pointTable, int* order, int col, int row, int 
 				int a;
 				addPiece(node, red + 1, i, row, a);
 
-				int* b = alphabeta(node, pointTable, order, col, row, depth - 1, alpha, beta, !red);
+				int* b = alphabeta(node, pointTable, order, col, row, depth - 1, alpha, beta, !red, i, startTime);
 
 				//max player always choose the higheset scoring move
 				if(b[1] > value){
@@ -187,7 +187,7 @@ int* alphabeta(int** board, int** pointTable, int* order, int col, int row, int 
 				int a;
 				addPiece(node, red + 1, i, row, a);
 
-				int* b = alphabeta(node, pointTable, order, col, row, depth - 1, alpha, beta, !red);
+				int* b = alphabeta(node, pointTable, order, col, row, depth - 1, alpha, beta, !red, i, startTime);
 
 				//min player always choose the lowest score
 				if(b[1] < value){
@@ -196,7 +196,7 @@ int* alphabeta(int** board, int** pointTable, int* order, int col, int row, int 
 				}
 
 				beta = std::min(value, beta);
-				
+
 				delete2D(node, row);
 				delete [] b;
 
@@ -204,7 +204,7 @@ int* alphabeta(int** board, int** pointTable, int* order, int col, int row, int 
 
 			}
 		}
-		
+
 		int* returnArray = new int[2];
 		returnArray[0] = bestCol;
 		returnArray[1] = value;

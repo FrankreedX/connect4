@@ -26,6 +26,6 @@ int askForInt(std::string prompt, int lowerLim, int upperLim);
 
 int random(int a, int b);
 
-int checkArgumentNumber(char *argument, int lower_bound, int upper_bound, std::string error);
+int checkArgumentNumber(char *argument, int lower_bound, int upper_bound, std::string error, std::string prompt);
 
 void delete2D(int** board, int row);

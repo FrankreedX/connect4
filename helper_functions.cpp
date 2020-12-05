@@ -241,7 +241,7 @@ int askForInt(std::string prompt, int lowerLim, int upperLim) {
 ** Output: input integer, exit program otherwise
 *******************************************************************/
 
-int checkArgumentNumber(char *argument, int lower_bound, int upper_bound, std::string error){
+int checkArgumentNumber(char *argument, int lower_bound, int upper_bound, std::string error, std::string prompt){
 	if(is_int(argument)){
 		int temp = string_to_int(argument);
 		if(checkRange(lower_bound, upper_bound, temp)){
@@ -249,7 +249,7 @@ int checkArgumentNumber(char *argument, int lower_bound, int upper_bound, std::s
 		}
 	}
 	std::cout << "Invalid arguments\n" << error << std::endl;
-	exit(42);
+	return askForInt(prompt, lower_bound, upper_bound);
 }
 
 /*******************************************************************

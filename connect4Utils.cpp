@@ -138,7 +138,7 @@ int** createPointTable(int col, int row){
 *******************************************************************/
 
 void printBoard(int** board, int col, int row){
-	bool doubleDigits = std::to_string(col).length() > 1;
+	bool doubleDigits = col > 9;
 	std::cout << (doubleDigits ? "    " : "   ");
 	for(int i = 0; i < col; i++){
 		std::cout << std::to_string(i).append(doubleDigits + 2 - std::to_string(i).length(), ' ');
